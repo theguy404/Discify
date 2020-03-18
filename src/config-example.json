@@ -1,0 +1,16 @@
+{
+    // Bot Client Token from discord development page
+    "clientToken":"",
+    // This is a single character prefix to use before every command
+    // example: !play  !being the prefix
+    "prefix":"",
+    // this is the voice channel id for the default channel to join
+    // right click any voice channel and click copy id
+    "voiceChannel":"",
+    // this is the bot's listening channel where all the text commands
+    // will be made
+    "textChannel":"",
+    // ****** Anything below should not be altered in this file but through commands
+    "streamOptions":{"seek":0,"volume":1},
+    "presets":[]
+}
