@@ -1,6 +1,3 @@
-[![TypeScript version][ts-badge]][typescript-36]
-[![Node.js version][nodejs-badge]][nodejs]
-
 ## Quick start
 
 This project is intended to be used with the latest Active LTS release of [Node.js][nodejs]. To start, just clone the repository with following commands:

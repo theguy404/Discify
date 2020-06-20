@@ -62,11 +62,17 @@ export class YTHandler {
     download(vid) {
         EventBus.emit("SendMessage", "Downloading " + vid.title);
         let download = ytdl('https://www.youtube.com/watch?v=' + vid.id);
-        download.pipe(fs.createWriteStream("./downloads/" + vid.title.slice(0, 20) + ".mp3"))
-            .on("finish", () => {
-                EventBus.emit("sendMessage", `Adding ${vid.title} to the queue.`);
-                EventBus.emit("QueueAdd", vid);
-            });
+        try {
+            download.pipe(fs.createWriteStream("./downloads/" + vid.title.slice(0, 20) + ".mp3")
+                .on('error', () => {EventBus.emit("sendMessage", `Error downloading ${vid.title}.`);}))
+                .on("finish", () => {
+                    EventBus.emit("sendMessage", `Adding ${vid.title} to the queue.`);
+                    EventBus.emit("QueueAdd", vid);
+                });
+        } catch (error) {
+            console.log(error);
+            EventBus.emit("sendMessage", `could not queue ${vid.title} due to an error.  please try again.`);
+        }
     }
     
     buildPlaylist(item) {
