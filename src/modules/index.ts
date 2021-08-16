@@ -1,9 +1,8 @@
-export { Connection } from "./Connection/";
-export { Messenger } from "./Messenger/";
+// App Connection
+export { Connection, Messenger, Dispatcher, Together } from "./Discord/index.js";
 
 // Audio Mods
-export { Queue } from "./Queue/";
-export { YTHandler } from "./YTHandler/";
-export { Podcast } from "./Podcast/";
-export { Dispatcher } from "./Dispatcher/";
-export { Radio } from "./Radio/";
+export { Queue } from "./Queue/index.js";
+export { YTHandler } from "./Youtube/index.js";
+export { Podcast } from "./Podcast/index.js";
+export { Radio } from "./Radio/index.js";

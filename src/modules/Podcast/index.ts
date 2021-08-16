@@ -1,20 +1,20 @@
-import { EventBus } from '../eventBus';
-const fs = require('fs');
-const http = require('http');
-const https =require('https');
+import { EventBus } from '../eventBus.js';
+import * as fs from 'fs';
+import * as http from 'http';
+import * as https from 'https';
 
 export class Podcast {
     constructor() {
         EventBus.on("play", this.podcastCheck.bind(this));
     }
     
-    podcastCheck(item) {
-        let playItem = item.request.join(" ");
-        if(playItem.includes(".mp3")) {
+    podcastCheck(interaction) {
+        let playItem = interaction.options.get('url');
+        if(playItem.value.includes(".mp3")) {
             this.download({
                 title: playItem.split("/").pop().split(".").shift(),
                 id: playItem,
-                owner: item.msg.author.username,
+                owner: interaction.user.username,
                 type: "file"
             });
         }

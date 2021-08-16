@@ -1,5 +1,5 @@
-import { EventBus } from '../eventBus';
-const fs = require('fs');
+import { EventBus } from '../eventBus.js';
+import * as fs from 'fs';
 
 export class Radio {
     

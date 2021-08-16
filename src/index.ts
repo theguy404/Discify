@@ -1,5 +1,5 @@
-import * as modules from './modules/';
-import { EventBus } from './modules/eventBus';
+import * as modules from './modules/index.js';
+import { EventBus } from './modules/eventBus.js';
 
 let connect;
 

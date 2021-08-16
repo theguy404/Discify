@@ -1,78 +1,85 @@
-import { EventBus } from '../eventBus';
-const fs = require('fs');
-const yts = require('yt-search');
-const ytdl = require('ytdl-core');
+import { EventBus } from '../eventBus.js';
+import * as fs from 'fs';
+import yts from 'yt-search';
+import ytdl from 'ytdl-core';
 
 export class YTHandler {
     
     constructor() {
         EventBus.on("play", this.YTCheck.bind(this));
         EventBus.on("YTdownload", this.download.bind(this));
+        EventBus.emit("addCommand", [{
+            name: "play",
+            description: "play audio from youtube video",
+            options: [{
+                name: "url",
+                type: 3,
+                description: "URL or Name of the Youtube video",
+                required: true
+            }]
+        }])
     }
     
-    YTCheck(item) {
-        item.request.shift();
-        let playItem = item.request.join(" ");
-        if(playItem.includes("youtube.com") || playItem.includes("youtu.be")) {
-            if(playItem.includes("list=")) {
-                this.buildPlaylist(item);
+    YTCheck(interaction) {
+        let playItem = interaction.options.get('url');
+        if(playItem.value.includes("youtube.com") || playItem.value.includes("youtu.be")) {
+            if(playItem.value.includes("list=")) {
+                this.buildPlaylist(interaction);
             } else {
-                this.videoSearch(item);
+                this.videoSearch(interaction);
             }
-        } else if(playItem.includes("http") || playItem.includes(".mp3")) {
+        } else if(playItem.value.includes("http") || playItem.value.includes(".mp3")) {
             return;
         } else {
-            this.keywordSearch(item);
+            this.keywordSearch(interaction);
         }
     }
     
     videoSearch(item) {
-        let id = item.request.join(" ").split("v=");
+        let id = item.options.get('url');
+        id = id.value.split("v=");
         let opts = { videoId: id[1] };
-    
-        yts( opts, function ( err, video ) {
-            if ( err ) throw err;
-            if(video) {
+        
+        yts({ videoId: id[1]}, (err, r) => {
+            if(r) {
                 EventBus.emit("YTdownload", {
-                    title: video.title,
-                    id: video.videoId,
-                    owner: item.msg.author.username,
-                    type: "file"
+                    title: r.title,
+                    id: r.videoId,
+                    owner: item.user.username,
+                    type: "file",
+                    interaction: item
                 });
             }
         });
     }
     
     keywordSearch(item) {
-        yts(item.request.join(" "), function ( err, r ) {
+        yts(item.options.get('url').value, function ( err, r ) {
             if ( err ) throw err;
             if(r.videos[0]){
                 EventBus.emit("YTdownload", {
                     title: r.videos[0].title, 
                     id: r.videos[0].videoId, 
-                    owner: item.msg.author.username, 
-                    type: "file"
+                    owner: item.user.username, 
+                    type: "file",
+                    interaction: item
                 });
             } else {
-                EventBus.emit("SendMessage", "Sorry I could not find " + item.request.join(" "));
+                EventBus.emit("SendMessage", "Sorry I could not find " + item.options.get('url').value);
             }
         });
     }
     
     download(vid) {
         EventBus.emit("SendMessage", "Downloading " + vid.title);
-        let download = ytdl('https://www.youtube.com/watch?v=' + vid.id);
-        try {
-            download.pipe(fs.createWriteStream("./downloads/" + vid.title.slice(0, 20) + ".mp3")
-                .on('error', () => {EventBus.emit("sendMessage", `Error downloading ${vid.title}.`);}))
+        
+        ytdl('https://www.youtube.com/watch?v=' + vid.id, { filter: 'audioonly'})
+            .pipe(fs.createWriteStream("./downloads/" + vid.title.slice(0, 20) + ".mp3"))
+                .on('error', () => {EventBus.emit("sendMessage", `Error downloading ${vid.title}.`);})
                 .on("finish", () => {
                     EventBus.emit("sendMessage", `Adding ${vid.title} to the queue.`);
                     EventBus.emit("QueueAdd", vid);
                 });
-        } catch (error) {
-            console.log(error);
-            EventBus.emit("sendMessage", `could not queue ${vid.title} due to an error.  please try again.`);
-        }
     }
     
     buildPlaylist(item) {
