@@ -29,4 +29,4 @@ build/
 .DS_Store
 
 # Config file
-src/config.json
+config.json
